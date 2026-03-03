@@ -1,0 +1,11 @@
+CREATE TABLE products (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nama TEXT,
+  harga INTEGER,
+  gambar TEXT,
+  deskripsi TEXT
+);
+
+INSERT INTO products (nama, harga, gambar, deskripsi) VALUES
+('Sepatu Sport', 350000, 'sepatu.jpg', 'Sepatu olahraga ringan'),
+('Kaos Polos', 75000, 'kaos.jpg', 'Kaos katun premium');
