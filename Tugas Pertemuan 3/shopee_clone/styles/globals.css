@@ -1,0 +1,20 @@
+/* Global styles for Shopee Clone */
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-danger {
+    background-color: #ff5722;
+    border-color: #ff5722;
+}
+
+.btn-danger:hover {
+    background-color: #e64a19;
+    border-color: #e64a19;
+}
