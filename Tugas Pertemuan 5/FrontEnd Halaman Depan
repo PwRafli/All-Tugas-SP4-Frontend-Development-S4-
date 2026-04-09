@@ -1,0 +1,194 @@
+npm install sqlite3
+
+ecommerce-sqlite/
+│
+├── app/
+│   ├── layout.js
+│   ├── page.js
+│   └── cart/
+│       └── page.js
+│
+├── app/api/
+│   ├── products/
+│   │   └── route.js
+│   └── cart/
+│       └── route.js
+│
+├── lib/
+│   └── db.js
+│
+├── package.json
+
+Database SQLite (lib/db.js)
+
+Ganti koneksi MySQL jadi SQLite:
+import sqlite3 from "sqlite3";
+import { open } from "sqlite";
+
+// buka database
+const dbPromise = open({
+  filename: "./database.sqlite",
+  driver: sqlite3.Database,
+});
+
+// buat table jika belum ada
+export async function initDB() {
+  const db = await dbPromise;
+
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS products (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      price INTEGER
+    );
+
+    CREATE TABLE IF NOT EXISTS cart (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      product_id INTEGER,
+      qty INTEGER
+    );
+  `);
+}
+
+export default dbPromise;
+
+API PRODUCTS (app/api/products/route.js)
+import dbPromise, { initDB } from "@/lib/db";
+
+export async function GET() {
+  await initDB();
+  const db = await dbPromise;
+
+  const products = await db.all("SELECT * FROM products");
+
+  return Response.json(products);
+}
+
+export async function POST(req) {
+  await initDB();
+  const db = await dbPromise;
+
+  const { name, price } = await req.json();
+
+  await db.run(
+    "INSERT INTO products (name, price) VALUES (?, ?)",
+    [name, price]
+  );
+
+  return Response.json({ message: "Produk ditambahkan" });
+}
+
+API CART (app/api/cart/route.js)
+import dbPromise, { initDB } from "@/lib/db";
+
+export async function GET() {
+  await initDB();
+  const db = await dbPromise;
+
+  const cart = await db.all(`
+    SELECT cart.id, products.name, products.price, cart.qty
+    FROM cart
+    JOIN products ON cart.product_id = products.id
+  `);
+
+  return Response.json(cart);
+}
+
+export async function POST(req) {
+  await initDB();
+  const db = await dbPromise;
+
+  const { product_id, qty } = await req.json();
+
+  await db.run(
+    "INSERT INTO cart (product_id, qty) VALUES (?, ?)",
+    [product_id, qty]
+  );
+
+  return Response.json({ message: "Masuk ke cart" });
+}
+
+HALAMAN HOME (app/page.js)
+"use client";
+import { useEffect, useState } from "react";
+
+export default function Home() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((data) => setProducts(data));
+  }, []);
+
+  const addToCart = async (id) => {
+    await fetch("/api/cart", {
+      method: "POST",
+      body: JSON.stringify({
+        product_id: id,
+        qty: 1,
+      }),
+    });
+
+    alert("Ditambahkan ke cart");
+  };
+
+  return (
+    <div>
+      <h1>Daftar Produk</h1>
+
+      {products.map((p) => (
+        <div key={p.id}>
+          <h3>{p.name}</h3>
+          <p>Rp {p.price}</p>
+          <button onClick={() => addToCart(p.id)}>
+            Tambah ke Cart
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+HALAMAN CART (app/cart/page.js)
+"use client";
+import { useEffect, useState } from "react";
+
+export default function CartPage() {
+  const [cart, setCart] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/cart")
+      .then((res) => res.json())
+      .then((data) => setCart(data));
+  }, []);
+
+  return (
+    <div>
+      <h1>Keranjang</h1>
+
+      {cart.map((item) => (
+        <div key={item.id}>
+          <h3>{item.name}</h3>
+          <p>Harga: Rp {item.price}</p>
+          <p>Qty: {item.qty}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+LAYOUT (app/layout.js)
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <h2>E-Commerce SQLite</h2>
+        {children}
+      </body>
+    </html>
+  );
+}
+
+Cara Menjalankan
+npm run dev
