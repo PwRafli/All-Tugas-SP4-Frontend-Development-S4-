@@ -1,0 +1,14 @@
+Penjelasan Isi Modul
+Modul ini memberikan panduan praktis tahap demi tahap untuk membangun aplikasi e-commerce, yang meliputi:  
+
+Keunggulan Next.js: Menjelaskan manfaat penggunaan Next.js seperti waktu peluncuran yang lebih cepat, dukungan komunitas yang baik, UX yang lebih baik, ramah SEO, dan fitur omnichannel.  
+
+Inisialisasi Project: Instruksi pembuatan direktori project dengan perintah npx create-next-app@latest dan konfigurasi awal (menggunakan ESLint, Tailwind CSS, dan App Router).  
+
+Instalasi Library: Langkah-langkah menginstal package tambahan yaitu mongodb dan bootstrap melalui npm.  
+
+Koneksi Database: Cara membuat file konfigurasi mongodb.js untuk menghubungkan aplikasi dengan database MongoDB.  
+
+Pembuatan API dan Komponen: Panduan membuat API endpoint untuk produk, integrasi Bootstrap pada file _app.js, serta pembuatan komponen UI seperti Navbar dan ProductCard.  
+
+Halaman Utama & Keranjang: Implementasi halaman beranda (index.js) yang mengambil data dari server (getServerSideProps) dan halaman keranjang belanja (cart.js).
