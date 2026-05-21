@@ -1,0 +1,145 @@
+Folder Lib : database.js
+const mysql = require('mysql2');
+
+const db = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'root', // Sesuaikan dengan password database kamu
+    database: 'database_db'
+});
+
+db.connect((err) => {
+    if (err) {
+        console.error('Gagal terhubung ke MySQL:', err);
+        return;
+    }
+    console.log('Terhubung Ke MySQL!');
+
+    // Inisialisasi Tabel Otomatis
+    const query = `
+    CREATE TABLE IF NOT EXISTS rooms (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        photo TEXT,
+        code_room VARCHAR(255) NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        room_size VARCHAR(100),
+        amenities TEXT,
+        price DOUBLE NOT NULL,
+        guests INT NOT NULL,
+        available INT DEFAULT 1
+    )`;
+
+    db.query(query, (err) => {
+        if (err) console.error("Gagal membuat tabel rooms:", err);
+    });
+
+    // Inisialisasi Tabel Admin
+    const queryAdmin = `
+    CREATE TABLE IF NOT EXISTS admins (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        username VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL
+    )`;
+    db.query(queryAdmin, (err) => {
+        if (err) {
+            console.error("Gagal membuat tabel admins:", err);
+        } else {
+            // Cek apakah sudah ada admin
+            db.query('SELECT COUNT(*) as count FROM admins', (err, results) => {
+                if (!err && results[0].count === 0) {
+                    db.query('INSERT INTO admins (username, password) VALUES (?, ?)', ['admin', 'admin123'], (err) => {
+                        if (err) console.error("Gagal membuat admin default:", err);
+                        else console.log("Admin default dibuat: admin / admin123");
+                    });
+                }
+            });
+        }
+    });
+});
+
+module.exports = db;
+
+api_next_mysql/
+│
+├── app/
+│   └── api/
+│       └── product/
+│           └── route.js
+│
+├── lib/
+│   └── database.js
+│
+├── package.json
+
+route.js API GET
+
+import db from "../../../../lib/database";
+
+export async function GET() {
+    try {
+        const rooms = await new Promise((resolve, reject) => {
+            db.query("SELECT * FROM rooms", (err, results) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(results);
+                }
+            });
+        });
+
+        return new Response(JSON.stringify(rooms), {
+            status: 200,
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+            },
+        });
+    } catch (error) {
+        console.error("GET API Error:", error);
+        return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
+
+export async function POST(req) {
+    try {
+        const body = await req.json();
+        const { photo, code_room, name, description, room_size, amenities, price, guests, available } = body;
+
+        const result = await new Promise((resolve, reject) => {
+            const query = `
+                INSERT INTO rooms (photo, code_room, name, description, room_size, amenities, price, guests, available)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `;
+            db.query(
+                query,
+                [photo, code_room, name, description, room_size, amenities, price || 0, guests || 0, available !== undefined ? available : 1],
+                (err, results) => {
+                    if (err) reject(err);
+                    else resolve(results);
+                }
+            );
+        });
+
+        return new Response(JSON.stringify({ success: true, message: "Room added successfully", insertId: result.insertId }), {
+            status: 201,
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+            }
+        });
+    } catch (error) {
+        console.error("POST API Error:", error);
+        return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+    }
+}
