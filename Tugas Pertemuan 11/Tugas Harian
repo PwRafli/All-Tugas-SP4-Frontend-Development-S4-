@@ -1,0 +1,32 @@
+📂 Struktur Folder ProyekBuat struktur folder proyek React Anda seperti di bawah ini:  
+
+website-statis/
+├── node_modules/
+├── public/
+│   ├── images/
+│   │   ├── kaoshitam.png
+│   │   ├── sepatukeren.png
+│   │   └── topitrendy.png
+│   ├── index.html
+│   ├── manifest.json
+│   └── robots.txt
+└── src/
+    ├── components/
+    │   ├── Cart.js
+    │   ├── Footer.js
+    │   ├── Header.js
+    │   ├── ProductCard.js
+    │   └── ProductList.js
+    ├── data/
+    │   └── products.js
+    ├── App.css
+    ├── App.js
+    ├── App.test.js
+    ├── index.css
+    └── index.js
+
+
+🚀 Cara MenjalankanBuka terminal pada text editor Anda di dalam folder project website-statis.  
+Jalankan perintah : npm start
+
+Aplikasi akan otomatis berjalan pada browser di alamat http://localhost:3000.
